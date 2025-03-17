@@ -1,0 +1,195 @@
+/* 时间轴页面样式 */
+.timeline-container {
+  position: relative;
+  min-height: 100vh;
+  padding-bottom: 60px;
+}
+
+/* 背景装饰 */
+.timeline-background-decoration {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: -1;
+  background: 
+    radial-gradient(circle at 10% 20%, rgba(216, 241, 230, 0.46) 0%, transparent 20%),
+    radial-gradient(circle at 85% 60%, rgba(187, 199, 255, 0.27) 0%, transparent 30%);
+  opacity: 0.6;
+}
+
+/* 标题卡片装饰圆圈 */
+.header-decoration-circle {
+  position: absolute;
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(24, 144, 255, 0.1) 0%, rgba(24, 144, 255, 0.05) 100%);
+  top: -80px;
+  right: -50px;
+  z-index: 0;
+}
+
+.header-decoration-circle-2 {
+  width: 120px;
+  height: 120px;
+  left: -40px;
+  top: auto;
+  bottom: -50px;
+  background: linear-gradient(135deg, rgba(82, 196, 26, 0.1) 0%, rgba(82, 196, 26, 0.05) 100%);
+}
+
+/* 时间轴元素样式增强 */
+.vertical-timeline-element {
+  margin: 2em 0;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.vertical-timeline-element:hover {
+  transform: translateY(-5px);
+}
+
+.vertical-timeline-element--regulation .vertical-timeline-element-content {
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.vertical-timeline-element--regulation:hover .vertical-timeline-element-content {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
+}
+
+.vertical-timeline::before {
+  background: linear-gradient(to bottom, 
+    rgba(24, 144, 255, 0.7), 
+    rgba(82, 196, 26, 0.7), 
+    rgba(250, 140, 22, 0.7),
+    rgba(114, 46, 209, 0.7));
+  width: 4px;
+}
+
+/* 图标动画效果 */
+.vertical-timeline-element-icon {
+  transition: all 0.3s ease;
+  box-shadow: 0 0 0 4px #fff, inset 0 2px 0 rgba(0, 0, 0, 0.08), 0 3px 0 4px rgba(0, 0, 0, 0.05);
+}
+
+.vertical-timeline-element:hover .vertical-timeline-element-icon {
+  transform: scale(1.15);
+}
+
+/* 年份标签美化 */
+.vertical-timeline-element--year {
+  margin-bottom: 3em;
+}
+
+.vertical-timeline-element--year .vertical-timeline-element-content {
+  padding: 1.5em;
+}
+
+/* 动画效果 */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.timeline-header-card {
+  animation: fadeIn 0.8s ease-out;
+}
+
+/* 响应式调整 */
+@media only screen and (max-width: 1169px) {
+  .vertical-timeline-element-date {
+    margin-top: 1em !important;
+    margin-bottom: 1em !important;
+    padding: 0.5em 1em !important;
+    background: rgba(245, 245, 245, 0.9);
+    border-radius: 20px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    text-align: center;
+  }
+  
+  .vertical-timeline::before {
+    left: 18px;
+  }
+}
+
+/* 加载更多按钮悬浮效果 */
+.timeline-container button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(24, 144, 255, 0.3) !important;
+  transition: all 0.3s ease;
+}
+
+/* 年份导航栏 */
+.year-navigation {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 8px 0;
+  z-index: 100;
+  backdrop-filter: blur(5px);
+  transition: all 0.3s ease;
+  animation: slideDown 0.3s forwards;
+}
+
+.year-navigation-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  padding: 0 20px;
+}
+
+.year-navigation button {
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.year-navigation button:hover {
+  transform: translateY(-2px);
+}
+
+.year-navigation button::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 0;
+  height: 2px;
+  background: currentColor;
+  transition: all 0.3s ease;
+  transform: translateX(-50%);
+}
+
+.year-navigation button:hover::after {
+  width: 80%;
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* 筛选结果样式 */
+.filter-summary {
+  margin-top: 12px;
+  padding: 8px 12px;
+  background: rgba(24, 144, 255, 0.1);
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  animation: fadeIn 0.5s ease-out;
+} 
