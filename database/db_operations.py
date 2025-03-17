@@ -31,18 +31,44 @@ class DBOperations:
         """获取数据库连接"""
         return sqlite3.connect(self.db_path)
 
-    def save_regulation(self, title, publish_date, source, content, url, effective_date=None, category=None):
-        """保存法规信息到数据库"""
+    def save_regulation(self, title, publish_date, source, content, url, effective_date=None, implementation_date=None, category=None):
+        """保存法规信息到数据库
+        
+        Args:
+            title: 法规标题
+            publish_date: 发布日期
+            source: 来源
+            content: 内容
+            url: 原文链接
+            effective_date: 生效日期
+            implementation_date: 施行日期
+            category: 分类
+        """
         conn = self.get_connection()
         cursor = conn.cursor()
+        
+        # 检查表中是否存在implementation_date字段
+        cursor.execute("PRAGMA table_info(regulations)")
+        columns = cursor.fetchall()
+        column_names = [column[1] for column in columns]
+        
+        # 如果不存在implementation_date字段，添加它
+        if 'implementation_date' not in column_names:
+            try:
+                cursor.execute("ALTER TABLE regulations ADD COLUMN implementation_date TEXT")
+                conn.commit()
+                print("已添加implementation_date字段到regulations表")
+            except Exception as e:
+                print(f"添加implementation_date字段失败: {e}")
+                conn.rollback()
         
         try:
             cursor.execute(
                 """
-                INSERT INTO regulations (title, publish_date, effective_date, source, content, url, category)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO regulations (title, publish_date, effective_date, implementation_date, source, content, url, category)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                 """,
-                (title, publish_date, effective_date, source, content, url, category)
+                (title, publish_date, effective_date, implementation_date, source, content, url, category)
             )
             regulation_id = cursor.lastrowid
             conn.commit()
@@ -284,4 +310,45 @@ class DBOperations:
                 'error': '解析解读数据失败',
                 'created_at': result['created_at'],
                 'updated_at': result['updated_at']
-            } 
+            }
+
+    def update_regulation(self, regulation_id, update_fields):
+        """更新法规记录的特定字段
+        
+        Args:
+            regulation_id: 法规ID
+            update_fields: 需要更新的字段字典，如 {'publish_date': '2023-01-01'}
+            
+        Returns:
+            是否更新成功
+        """
+        if not update_fields:
+            return False
+            
+        conn = self.get_connection()
+        cursor = conn.cursor()
+        
+        try:
+            # 构建SET子句和参数
+            set_clause = ", ".join([f"{key} = ?" for key in update_fields.keys()])
+            params = list(update_fields.values())
+            params.append(regulation_id)  # WHERE条件参数
+            
+            # 执行更新
+            cursor.execute(
+                f"""
+                UPDATE regulations
+                SET {set_clause}
+                WHERE id = ?
+                """,
+                params
+            )
+            
+            success = cursor.rowcount > 0
+            conn.commit()
+            return success
+        except Exception as e:
+            conn.rollback()
+            raise e
+        finally:
+            conn.close() 

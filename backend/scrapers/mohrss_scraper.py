@@ -170,29 +170,115 @@ class MohrssRegulationScraper:
             
             # 尝试提取有效日期和来源信息
             effective_date = None
+            implementation_date = None
             source = "人力资源和社会保障部"
             
-            # 尝试提取发布日期（如果元数据中不存在）
-            publish_date = regulation_meta.get('publish_date', '')
+            # 从元数据中提取发布日期
+            publish_date = None
+            
+            # 1. 首先尝试从页面元数据中提取发文日期（发布日期）
+            # 改进元数据选择器，增加更多可能的元数据容器选择
+            metadata_list = soup.select('.xxgk-info-head li, .xxgk_detail_head li, .metadata li, .info-source li, .xxgk-detail-source li')
+            
+            # 如果上述选择器没找到元素，尝试更通用的方式
+            if not metadata_list:
+                # 查找所有可能包含"发文日期"、"发布日期"的列表项
+                metadata_list = soup.select('li')
+            
+            # 记录调试信息
+            print(f"找到 {len(metadata_list)} 个元数据项")
+            
+            for item in metadata_list:
+                text = item.get_text(strip=True)
+                # 打印调试信息
+                print(f"元数据项: {text}")
+                
+                # 检查是否包含发文日期相关信息
+                if '发文日期' in text or '发布日期' in text or '发布时间' in text:
+                    # 尝试不同的日期格式匹配
+                    # 1. 年月日格式（如：2023年08月16日）
+                    date_match = re.search(r'(\d{4}年\d{1,2}月\d{1,2}日)', text)
+                    if date_match:
+                        try:
+                            publish_date = datetime.strptime(date_match.group(1), '%Y年%m月%d日').strftime('%Y-%m-%d')
+                            print(f"从元数据中提取到发文日期: {publish_date}")
+                            break
+                        except ValueError:
+                            pass
+                    
+                    # 2. 年-月-日格式（如：2023-08-16）
+                    date_match = re.search(r'(\d{4}-\d{1,2}-\d{1,2})', text)
+                    if date_match:
+                        try:
+                            publish_date = date_match.group(1)
+                            # 确保日期格式统一
+                            publish_date = datetime.strptime(publish_date, '%Y-%m-%d').strftime('%Y-%m-%d')
+                            print(f"从元数据中提取到发文日期: {publish_date}")
+                            break
+                        except ValueError:
+                            pass
+                    
+                    # 3. 纯数字格式（如：20230816）
+                    date_match = re.search(r'(\d{8})', text)
+                    if date_match:
+                        try:
+                            date_str = date_match.group(1)
+                            publish_date = datetime.strptime(date_str, '%Y%m%d').strftime('%Y-%m-%d')
+                            print(f"从元数据中提取到发文日期: {publish_date}")
+                            break
+                        except ValueError:
+                            pass
+                    
+                    # 如果未通过正则匹配到日期，尝试提取"发文日期"后面的文本
+                    if not publish_date:
+                        date_part = text.split('发文日期')[-1].strip()
+                        if date_part and len(date_part) <= 15:  # 限制长度避免提取过多无关文本
+                            print(f"尝试解析日期文本: {date_part}")
+                            # 尝试多种日期格式
+                            for fmt in ['%Y年%m月%d日', '%Y-%m-%d', '%Y/%m/%d', '%Y.%m.%d']:
+                                try:
+                                    publish_date = datetime.strptime(date_part, fmt).strftime('%Y-%m-%d')
+                                    print(f"成功解析发文日期: {publish_date}")
+                                    break
+                                except ValueError:
+                                    continue
+                        if publish_date:
+                            break
+            
+            # 2. 如果元数据中没有找到，使用regulation_meta中的日期
             if not publish_date:
-                # 尝试从URL或内容中提取日期
+                publish_date = regulation_meta.get('publish_date', '')
+                if publish_date:
+                    print(f"使用列表页中的发布日期: {publish_date}")
+            
+            # 3. 如果仍然没有找到，尝试从URL中提取
+            if not publish_date:
                 date_match_url = re.search(r'/t(\d{8})_', url)
                 if date_match_url:
                     try:
                         date_str = date_match_url.group(1)
                         publish_date = datetime.strptime(date_str, '%Y%m%d').strftime('%Y-%m-%d')
+                        print(f"从URL中提取到发布日期: {publish_date}")
                     except ValueError:
                         pass
             
-            # 查找可能包含有效日期的文本
-            date_pattern = r'自(\d{4}年\d{1,2}月\d{1,2}日)起施行|自(\d{4}年\d{1,2}月\d{1,2}日)生效'
-            date_match = re.search(date_pattern, content)
-            if date_match:
-                date_str = date_match.group(1) or date_match.group(2)
+            # 查找有效日期（施行日期）
+            implementation_pattern = r'自(\d{4}年\d{1,2}月\d{1,2}日)起施行|自(\d{4}年\d{1,2}月\d{1,2}日)生效'
+            implementation_match = re.search(implementation_pattern, content)
+            if implementation_match:
+                date_str = implementation_match.group(1) or implementation_match.group(2)
                 try:
-                    effective_date = datetime.strptime(date_str, '%Y年%m月%d日').strftime('%Y-%m-%d')
+                    implementation_date = datetime.strptime(date_str, '%Y年%m月%d日').strftime('%Y-%m-%d')
+                    print(f"提取到施行日期: {implementation_date}")
                 except ValueError:
-                    effective_date = None
+                    implementation_date = None
+            
+            # 区分有效日期和施行日期
+            if implementation_date and not effective_date:
+                effective_date = implementation_date
+            
+            # 打印调试信息
+            print(f"最终解析结果 - 发布日期: {publish_date}, 施行日期: {implementation_date}")
             
             return {
                 'title': regulation_meta['title'],
@@ -200,6 +286,7 @@ class MohrssRegulationScraper:
                 'url': url,
                 'content': content,
                 'effective_date': effective_date,
+                'implementation_date': implementation_date,  # 新增施行日期字段
                 'source': source,
                 'category': '法律法规'
             }
@@ -315,6 +402,7 @@ class MohrssRegulationScraper:
                             content=detail['content'],
                             url=detail['url'],
                             effective_date=detail.get('effective_date'),
+                            implementation_date=detail.get('implementation_date'),
                             category=detail.get('category')
                         )
                         # 添加到已存在URL集合，避免后续重复添加
@@ -331,8 +419,119 @@ class MohrssRegulationScraper:
         
         return saved_count
 
+    def update_existing_regulations(self):
+        """更新现有法规的元数据（特别是发文日期和施行日期）"""
+        # 获取所有法规记录
+        all_regulations = self.db.get_regulations(limit=1000)
+        total_count = len(all_regulations)
+        updated_count = 0
+        
+        print(f"开始更新 {total_count} 条法规记录的元数据")
+        
+        for i, reg in enumerate(all_regulations, 1):
+            reg_id = reg['id']
+            title = reg['title']
+            url = reg.get('url', '')
+            
+            if not url:
+                print(f"跳过 ID={reg_id} - {title}：没有URL")
+                continue
+            
+            print(f"\n[{i}/{total_count}] 更新：{title}")
+            
+            # 创建metadata对象，用于传递给parse_regulation_detail
+            reg_meta = {
+                'title': title,
+                'url': url,
+                'publish_date': reg.get('publish_date', '')
+            }
+            
+            # 重新解析详情页
+            detail = self.parse_regulation_detail(url, reg_meta)
+            
+            if not detail:
+                print(f"跳过 ID={reg_id} - {title}：无法解析详情")
+                continue
+            
+            # 检查是否需要更新
+            need_update = False
+            update_fields = {}
+            
+            # 检查发布日期
+            if detail.get('publish_date') and detail['publish_date'] != reg.get('publish_date'):
+                update_fields['publish_date'] = detail['publish_date']
+                need_update = True
+                print(f"  - 发布日期：{reg.get('publish_date', '空')} -> {detail['publish_date']}")
+            
+            # 检查施行日期
+            if detail.get('implementation_date') and detail.get('implementation_date') != reg.get('implementation_date'):
+                update_fields['implementation_date'] = detail['implementation_date']
+                need_update = True
+                print(f"  - 施行日期：{reg.get('implementation_date', '空')} -> {detail['implementation_date']}")
+            
+            # 检查有效日期
+            if detail.get('effective_date') and detail.get('effective_date') != reg.get('effective_date'):
+                update_fields['effective_date'] = detail['effective_date']
+                need_update = True
+                print(f"  - 有效日期：{reg.get('effective_date', '空')} -> {detail['effective_date']}")
+            
+            # 如果需要更新，调用数据库更新操作
+            if need_update:
+                try:
+                    self.db.update_regulation(reg_id, update_fields)
+                    updated_count += 1
+                    print(f"  ✅ 成功更新 ID={reg_id} - {title}")
+                except Exception as e:
+                    print(f"  ❌ 更新失败 ID={reg_id} - {title}：{e}")
+            else:
+                print(f"  ✓ 无需更新 ID={reg_id} - {title}")
+            
+            # 添加延迟以避免请求过于频繁
+            time.sleep(1)
+        
+        print(f"\n更新完成！共更新 {updated_count}/{total_count} 条法规记录")
+        return updated_count
+
 if __name__ == "__main__":
     # 运行爬虫
     scraper = MohrssRegulationScraper()
-    count = scraper.scrape_regulations(pages=1)
-    print(f"共保存 {count} 条法规信息") 
+    
+    # 解析命令行参数
+    import sys
+    if len(sys.argv) > 1:
+        command = sys.argv[1]
+        
+        if command == "test_date":
+            # 测试发文日期解析
+            test_url = "https://www.mohrss.gov.cn/xxgk2020/fdzdgknr/zcfg/fg/202312/t20231201_509829.html"
+            print(f"\n=== 测试发文日期解析: {test_url} ===")
+            
+            # 创建一个简单的regulation_meta对象
+            mock_meta = {
+                'title': '社会保险经办条例',
+                'url': test_url,
+                'publish_date': ''
+            }
+            
+            # 解析详情
+            detail = scraper.parse_regulation_detail(test_url, mock_meta)
+            if detail:
+                print("\n解析结果:")
+                print(f"标题: {detail['title']}")
+                print(f"发布日期: {detail['publish_date']}")
+                print(f"施行日期: {detail.get('implementation_date')}")
+                print(f"有效日期: {detail.get('effective_date')}")
+                
+                if detail['publish_date'] == '2023-08-16':
+                    print("\n✅ 测试通过！成功解析出正确的发文日期")
+                else:
+                    print(f"\n❌ 测试未通过！解析出的发文日期不正确: {detail['publish_date']}")
+        
+        elif command == "update":
+            # 更新现有法规的元数据
+            scraper.update_existing_regulations()
+    
+    else:
+        # 正常模式：运行爬虫
+        count = scraper.scrape_regulations(pages=1)
+        print(f"共保存 {count} 条法规信息") 
