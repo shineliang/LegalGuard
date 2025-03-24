@@ -27,7 +27,7 @@ const RegulationsList = () => {
       dataIndex: 'title',
       key: 'title',
       render: (text, record) => (
-        <Link to={`/regulations/${record.id}`}>{text}</Link>
+        <Link to={`/legalguard/regulations/${record.id}`}>{text}</Link>
       ),
       width: '40%'
     },

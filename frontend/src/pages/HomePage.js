@@ -106,7 +106,7 @@ const HomePage = () => {
           renderItem={item => (
             <List.Item>
               <List.Item.Meta
-                title={<Link to={`/regulations/${item.id}`}>{item.title}</Link>}
+                title={<Link to={`/legalguard/regulations/${item.id}`}>{item.title}</Link>}
                 description={`发布日期: ${item.publish_date} | 来源: ${item.source}`}
               />
             </List.Item>
@@ -116,10 +116,10 @@ const HomePage = () => {
 
       <div style={{ marginTop: 20, textAlign: 'center' }}>
         <Button type="primary" size="large">
-          <Link to="/regulations">查看所有法规</Link>
+          <Link to="/legalguard/regulations">查看所有法规</Link>
         </Button>
         <Button style={{ marginLeft: 16 }} size="large">
-          <Link to="/timeline">查看时间轴</Link>
+          <Link to="/legalguard/timeline">查看时间轴</Link>
         </Button>
       </div>
     </div>

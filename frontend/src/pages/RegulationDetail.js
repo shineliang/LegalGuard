@@ -90,7 +90,7 @@ const RegulationDetail = () => {
     return (
       <div style={{ textAlign: 'center', padding: 50 }}>
         <Title level={3}>未找到该法规</Title>
-        <Button type="primary" onClick={() => navigate('/regulations')}>
+        <Button type="primary" onClick={() => navigate('/legalguard/regulations')}>
           返回法规列表
         </Button>
       </div>
@@ -102,7 +102,7 @@ const RegulationDetail = () => {
       <Button 
         type="link" 
         icon={<ArrowLeftOutlined />} 
-        onClick={() => navigate('/regulations')}
+        onClick={() => navigate('/legalguard/regulations')}
         style={{ marginBottom: 16, paddingLeft: 0 }}
       >
         返回法规列表
