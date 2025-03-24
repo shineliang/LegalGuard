@@ -130,7 +130,7 @@ const Timeline = () => {
   };
 
   const handleViewDetail = (id) => {
-    navigate(`/regulations/${id}`);
+    navigate(`/legalguard/regulations/${id}`);
   };
 
   const handleSearch = (value) => {
@@ -269,7 +269,7 @@ const Timeline = () => {
       )}
       
       <Card 
-        bordered={false} 
+        variant="borderless" 
         className="timeline-header-card"
         style={{ 
           borderRadius: '12px', 
@@ -292,7 +292,7 @@ const Timeline = () => {
         </Paragraph>
         
         <Card 
-          bordered={false}
+          variant="borderless"
           style={{ 
             marginTop: '20px', 
             borderRadius: '8px',
@@ -356,131 +356,133 @@ const Timeline = () => {
       {sortedYears.length === 0 ? (
         <Empty description="没有符合条件的法规" />
       ) : (
-        <VerticalTimeline animate={true} lineColor="#f0f0f0" ref={timelineRef}>
-          {sortedYears.map(year => {
-            const yearTheme = getYearTheme(year);
-            return (
-            <React.Fragment key={year}>
-              <VerticalTimelineElement
-                id={`year-${year}`}
-                className="vertical-timeline-element--year"
-                contentStyle={{ 
-                  background: yearTheme.bg, 
-                  color: '#fff', 
-                  borderRadius: '12px',
-                  boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)'
-                }}
-                contentArrowStyle={{ borderRight: `7px solid ${yearTheme.bg}` }}
-                date={
-                  <span style={{ 
-                    fontWeight: 'bold', 
-                    fontSize: '18px',
-                    padding: '6px 12px',
-                    background: 'rgba(255, 255, 255, 0.9)',
-                    borderRadius: '20px',
-                    boxShadow: '0 4px 10px rgba(0, 0, 0, 0.06)',
-                    color: yearTheme.bg
-                  }}>
-                    {year}
-                  </span>
-                }
-                iconStyle={{ 
-                  background: yearTheme.bg, 
-                  color: '#fff',
-                  boxShadow: '0 0 0 4px #fff, 0 0 0 5px rgba(0, 0, 0, 0.1), 0 0 30px rgba(0, 0, 0, 0.1)'
-                }}
-                icon={yearTheme.icon}
-              >
-                <h3 className="vertical-timeline-element-title" style={{ fontSize: '20px', margin: '0 0 8px' }}>
-                  {year}年
-                </h3>
-                <p style={{ 
-                  display: 'inline-block',
-                  background: 'rgba(255, 255, 255, 0.2)',
-                  padding: '4px 12px',
-                  borderRadius: '16px',
-                  fontSize: '14px',
-                  fontWeight: 'bold'
-                }}>
-                  共 {groupedRegulations[year].length} 项法规政策
-                </p>
-              </VerticalTimelineElement>
-
-              {groupedRegulations[year].map(regulation => (
+        <div ref={timelineRef}>
+          <VerticalTimeline animate={true} lineColor="#f0f0f0">
+            {sortedYears.map(year => {
+              const yearTheme = getYearTheme(year);
+              return (
+              <React.Fragment key={year}>
                 <VerticalTimelineElement
-                  key={regulation.id}
-                  className="vertical-timeline-element--regulation"
+                  id={`year-${year}`}
+                  className="vertical-timeline-element--year"
+                  contentStyle={{ 
+                    background: yearTheme.bg, 
+                    color: '#fff', 
+                    borderRadius: '12px',
+                    boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)'
+                  }}
+                  contentArrowStyle={{ borderRight: `7px solid ${yearTheme.bg}` }}
                   date={
-                    <Tooltip title="发布日期">
-                      <span style={{ 
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        fontSize: '14px',
-                        fontWeight: '500',
-                        color: '#555'
-                      }}>
-                        <CalendarOutlined style={{ marginRight: '6px' }} />
-                        {regulation.publish_date}
-                      </span>
-                    </Tooltip>
+                    <span style={{ 
+                      fontWeight: 'bold', 
+                      fontSize: '18px',
+                      padding: '6px 12px',
+                      background: 'rgba(255, 255, 255, 0.9)',
+                      borderRadius: '20px',
+                      boxShadow: '0 4px 10px rgba(0, 0, 0, 0.06)',
+                      color: yearTheme.bg
+                    }}>
+                      {year}
+                    </span>
                   }
                   iconStyle={{ 
-                    background: '#fff', 
-                    color: yearTheme.bg,
-                    boxShadow: '0 0 0 3px #f0f0f0, 0 5px 10px rgba(0, 0, 0, 0.1)' 
+                    background: yearTheme.bg, 
+                    color: '#fff',
+                    boxShadow: '0 0 0 4px #fff, 0 0 0 5px rgba(0, 0, 0, 0.1), 0 0 30px rgba(0, 0, 0, 0.1)'
                   }}
-                  icon={getCategoryIcon(regulation.category)}
-                  contentStyle={{
-                    background: '#fff',
-                    borderRadius: '12px',
-                    boxShadow: '0 5px 15px rgba(0, 0, 0, 0.05)',
-                    border: '1px solid #f0f0f0',
-                    padding: '24px'
-                  }}
+                  icon={yearTheme.icon}
                 >
-                  <h3 className="vertical-timeline-element-title" style={{ 
-                    fontSize: '16px', 
-                    margin: '0 0 12px',
-                    fontWeight: '600'
-                  }}>
-                    {regulation.title}
+                  <h3 className="vertical-timeline-element-title" style={{ fontSize: '20px', margin: '0 0 8px' }}>
+                    {year}年
                   </h3>
-                  
-                  <div style={{ marginBottom: '12px', display: 'flex', alignItems: 'center' }}>
-                    <BankOutlined style={{ color: '#888', marginRight: '6px' }} />
-                    <span style={{ color: '#666', fontSize: '14px' }}>
-                      来源: {regulation.source}
-                    </span>
-                  </div>
-                  
-                  {regulation.category && (
-                    <div style={{ marginBottom: '16px' }}>
-                      <Tag color={yearTheme.bg} icon={getCategoryIcon(regulation.category)}>
-                        {regulation.category}
-                      </Tag>
-                    </div>
-                  )}
-                  
-                  <Button 
-                    type="primary" 
-                    size="middle" 
-                    onClick={() => handleViewDetail(regulation.id)}
-                    icon={<ReadOutlined />}
-                    style={{ 
-                      marginTop: 12,
-                      background: yearTheme.bg,
-                      border: 'none',
-                      borderRadius: '6px',
-                      boxShadow: '0 2px 0 rgba(0,0,0,0.045)'
+                  <p style={{ 
+                    display: 'inline-block',
+                    background: 'rgba(255, 255, 255, 0.2)',
+                    padding: '4px 12px',
+                    borderRadius: '16px',
+                    fontSize: '14px',
+                    fontWeight: 'bold'
+                  }}>
+                    共 {groupedRegulations[year].length} 项法规政策
+                  </p>
+                </VerticalTimelineElement>
+
+                {groupedRegulations[year].map(regulation => (
+                  <VerticalTimelineElement
+                    key={regulation.id}
+                    className="vertical-timeline-element--regulation"
+                    date={
+                      <Tooltip title="发布日期">
+                        <span style={{ 
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          fontSize: '14px',
+                          fontWeight: '500',
+                          color: '#555'
+                        }}>
+                          <CalendarOutlined style={{ marginRight: '6px' }} />
+                          {regulation.publish_date}
+                        </span>
+                      </Tooltip>
+                    }
+                    iconStyle={{ 
+                      background: '#fff', 
+                      color: yearTheme.bg,
+                      boxShadow: '0 0 0 3px #f0f0f0, 0 5px 10px rgba(0, 0, 0, 0.1)' 
+                    }}
+                    icon={getCategoryIcon(regulation.category)}
+                    contentStyle={{
+                      background: '#fff',
+                      borderRadius: '12px',
+                      boxShadow: '0 5px 15px rgba(0, 0, 0, 0.05)',
+                      border: '1px solid #f0f0f0',
+                      padding: '24px'
                     }}
                   >
-                    查看详情
-                  </Button>
-                </VerticalTimelineElement>
-              ))}
-            </React.Fragment>
-          )})}
-        </VerticalTimeline>
+                    <h3 className="vertical-timeline-element-title" style={{ 
+                      fontSize: '16px', 
+                      margin: '0 0 12px',
+                      fontWeight: '600'
+                    }}>
+                      {regulation.title}
+                    </h3>
+                    
+                    <div style={{ marginBottom: '12px', display: 'flex', alignItems: 'center' }}>
+                      <BankOutlined style={{ color: '#888', marginRight: '6px' }} />
+                      <span style={{ color: '#666', fontSize: '14px' }}>
+                        来源: {regulation.source}
+                      </span>
+                    </div>
+                    
+                    {regulation.category && (
+                      <div style={{ marginBottom: '16px' }}>
+                        <Tag color={yearTheme.bg} icon={getCategoryIcon(regulation.category)}>
+                          {regulation.category}
+                        </Tag>
+                      </div>
+                    )}
+                    
+                    <Button 
+                      type="primary" 
+                      size="middle" 
+                      onClick={() => handleViewDetail(regulation.id)}
+                      icon={<ReadOutlined />}
+                      style={{ 
+                        marginTop: 12,
+                        background: yearTheme.bg,
+                        border: 'none',
+                        borderRadius: '6px',
+                        boxShadow: '0 2px 0 rgba(0,0,0,0.045)'
+                      }}
+                    >
+                      查看详情
+                    </Button>
+                  </VerticalTimelineElement>
+                ))}
+              </React.Fragment>
+            )})}
+          </VerticalTimeline>
+        </div>
       )}
 
       {!loading && filteredRegulations.length === regulations.length && regulations.length >= limit && (

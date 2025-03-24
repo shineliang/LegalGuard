@@ -58,6 +58,7 @@ const App = () => {
         <Content style={{ padding: '0 50px', marginTop: 20 }}>
           <div className="site-layout-content">
             <Routes>
+              <Route path="/" element={<HomePage />} />
               <Route path="/legalguard" element={<HomePage />} />
               <Route path="/legalguard/regulations" element={<RegulationsList />} />
               <Route path="/legalguard/regulations/:id" element={<RegulationDetail />} />

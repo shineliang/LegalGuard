@@ -6,8 +6,8 @@ python database/init_db.py
 
 # 启动后端服务
 echo "启动后端服务..."
-cd backend
-python app.py &
+# cd backend
+python backend/app.py &
 BACKEND_PID=$!
 cd ..
 
