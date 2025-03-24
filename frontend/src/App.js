@@ -30,27 +30,27 @@ const App = () => {
               {
                 key: '1',
                 icon: <HomeOutlined />,
-                label: <Link to="/">首页</Link>,
+                label: <Link to="/legalguard">首页</Link>,
               },
               {
                 key: '2',
                 icon: <BookOutlined />,
-                label: <Link to="/regulations">法规库</Link>,
+                label: <Link to="/legalguard/regulations">法规库</Link>,
               },
               {
                 key: '3',
                 icon: <HistoryOutlined />,
-                label: <Link to="/timeline">时间轴</Link>,
+                label: <Link to="/legalguard/timeline">时间轴</Link>,
               },
               {
                 key: '4',
                 icon: <SearchOutlined />,
-                label: <Link to="/regulations">法规查询</Link>,
+                label: <Link to="/legalguard/regulations">法规查询</Link>,
               },
               {
                 key: '5',
                 icon: <RobotOutlined />,
-                label: <Link to="/admin">管理</Link>,
+                label: <Link to="/legalguard/admin">管理</Link>,
               }
             ]}
           />
@@ -58,11 +58,11 @@ const App = () => {
         <Content style={{ padding: '0 50px', marginTop: 20 }}>
           <div className="site-layout-content">
             <Routes>
-              <Route path="/" element={<HomePage />} />
-              <Route path="/regulations" element={<RegulationsList />} />
-              <Route path="/regulations/:id" element={<RegulationDetail />} />
-              <Route path="/timeline" element={<Timeline />} />
-              <Route path="/admin" element={<AdminPage />} />
+              <Route path="/legalguard" element={<HomePage />} />
+              <Route path="/legalguard/regulations" element={<RegulationsList />} />
+              <Route path="/legalguard/regulations/:id" element={<RegulationDetail />} />
+              <Route path="/legalguard/timeline" element={<Timeline />} />
+              <Route path="/legalguard/admin" element={<AdminPage />} />
             </Routes>
           </div>
         </Content>
